@@ -243,7 +243,13 @@
     .header-badge { display: none; }
     .kpi-card { padding: 18px; }
   }
+  /* ── Trend Chart ── */
+  .chart-card { margin-bottom: 24px; }
+  .chart-body { padding: 20px 24px 24px; position: relative; }
+  .chart-body canvas { width: 100% !important; height: auto !important; max-height: 340px; }
+
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -305,6 +311,17 @@
         </thead>
         <tbody id="topProductsBody"></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Trend Chart -->
+  <div class="card chart-card">
+    <div class="card-header">
+      <span class="card-header-dot"></span> 重点品种趋势图
+      <span style="font-size:12px;color:var(--gray-400);font-weight:400;margin-left:auto">近4周</span>
+    </div>
+    <div class="card-body chart-body">
+      <canvas id="trendChart"></canvas>
     </div>
   </div>
 
@@ -400,6 +417,118 @@ data.products.forEach((p, i) => {
   `;
   tbody.appendChild(tr);
 });
+
+
+// ── Trend Chart (近4周) ──
+// ⚠️ 模拟数据 — 替换为真实数据时修改下方的 labels 和 datasets
+(function() {
+  const ctx = document.getElementById("trendChart");
+  if (!ctx) return;
+
+  const labels = ["第1周", "第2周", "第3周", "第4周"];
+
+  const datasets = [
+    {
+      label: "普乐沙福",
+      data: [82000, 65000, 58800, 68200],
+      borderColor: "#16a34a",
+      backgroundColor: "rgba(22,163,74,0.06)",
+      borderWidth: 2.5,
+      tension: 0.35,
+      fill: true,
+      pointRadius: 4,
+      pointBackgroundColor: "#16a34a",
+      pointBorderColor: "#fff",
+      pointBorderWidth: 2,
+      pointHoverRadius: 6,
+    },
+    {
+      label: "蛋白（绿十字）",
+      data: [71000, 73000, 69200, 71200],
+      borderColor: "#2563eb",
+      backgroundColor: "rgba(37,99,235,0.04)",
+      borderWidth: 2.5,
+      tension: 0.35,
+      fill: true,
+      pointRadius: 4,
+      pointBackgroundColor: "#2563eb",
+      pointBorderColor: "#fff",
+      pointBorderWidth: 2,
+      pointHoverRadius: 6,
+    },
+    {
+      label: "丙球（康宝）",
+      data: [95000, 88000, 102000, 95600],
+      borderColor: "#d97706",
+      backgroundColor: "rgba(217,119,6,0.04)",
+      borderWidth: 2.5,
+      tension: 0.35,
+      fill: true,
+      pointRadius: 4,
+      pointBackgroundColor: "#d97706",
+      pointBorderColor: "#fff",
+      pointBorderWidth: 2,
+      pointHoverRadius: 6,
+    },
+  ];
+
+  new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: "index",
+        intersect: false,
+      },
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            usePointStyle: true,
+            pointStyleWidth: 8,
+            padding: 24,
+            font: { size: 13, family: "inherit" },
+            color: "#374151",
+          },
+        },
+        tooltip: {
+          backgroundColor: "#fff",
+          titleColor: "#111827",
+          bodyColor: "#374151",
+          borderColor: "#e5e7eb",
+          borderWidth: 1,
+          padding: 12,
+          cornerRadius: 8,
+          displayColors: true,
+          callbacks: {
+            label: function(ctx) {
+              return ctx.dataset.label + ": \xA5" + ctx.parsed.y.toLocaleString("zh-CN");
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: "#9ca3af", font: { size: 12 } },
+          border: { color: "#e5e7eb" },
+        },
+        y: {
+          position: "right",
+          grid: { color: "#f3f4f6" },
+          border: { display: false },
+          ticks: {
+            color: "#9ca3af",
+            font: { size: 11 },
+            callback: function(v) { return "\xA5" + (v / 10000).toFixed(1) + "万"; },
+          },
+        },
+      },
+    },
+  });
+})();
 
 // ── Date ──
 const now = new Date();
